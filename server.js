@@ -8,7 +8,7 @@ server.all("/", (req, res) => {
 const keepAlive = () => {
   server.listen(3000, () => {
     console.log("Server is ready.");
-  })
-}
+  });
+};
 
 module.exports = keepAlive;

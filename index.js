@@ -13,32 +13,55 @@ client.on("ready", () => {
 });
 
 client.on("messageCreate", async message => {
-  const isAuthorBot = message.author.bot;
-
-  if(isAuthorBot) return;
+  if(message.author.bot) return;
 
   const isCommandChannel = message.channel.name === COMMAND_CHANNEL;
   const isMessageCommand = COMMAND_PREFIXES
     .some(pre => message.content.startsWith(pre));
 
   if(!isCommandChannel && isMessageCommand) {
-    const reply = await message
-      .reply("You can't post commands in this channel. Use bot-commands channel for that.");
+    const replyText = "You can't post commands in this channel. Use bot-commands channel for that.";
 
-    await utils.sleep(REPLY_DELETION_IN_MS);
-    message.delete();
-    reply.delete();
+    handleCommandInRegularChannel(message, replyText);
   }
   
   if(isCommandChannel && !isMessageCommand) {
-    const reply = await message
-      .reply("You can only post bot commands in this channel.");
-
-    await utils.sleep(REPLY_DELETION_IN_MS);
-    message.delete();
-    reply.delete();
+    const replyText = "You can only post bot commands in this channel.";
+    
+    handleNonCommandInCommandChannel(message,replyText);
   }
 });
+
+const handleCommandInRegularChannel = async (message, replyText) => {
+  const reply = await message.reply(replyText);
+  
+  await utils.sleep(REPLY_DELETION_IN_MS);
+
+  const channel = message.channel;
+
+  message.delete();
+  reply.delete();
+
+  channel.messages.cache.forEach(channelMessage => {
+    const isMessageDeleted = !channel.messages.cache.get(channelMessage.id) 
+      || channelMessage.id === message.id
+      || channelMessage.id === reply.id;
+    const isMessageAuthorBot = channelMessage.author.bot;
+
+    if(!isMessageDeleted && isMessageAuthorBot) {
+      channelMessage.delete()
+    }
+  });
+}
+
+const handleNonCommandInCommandChannel = async (message, replyText) => {
+  const reply = await message.reply(replyText);
+  
+  await utils.sleep(REPLY_DELETION_IN_MS);
+
+  message.delete();
+  reply.delete();
+}
 
 keepAlive();
 client.login(process.env['TOKEN']);
