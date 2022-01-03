@@ -6,7 +6,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 const COMMAND_CHANNEL = "bot-commands";
 const COMMAND_PREFIXES = ["#"];
-const REPLY_DELETION_IN_MS = 5 * 1000;
+const CLEAN_UP_DELAY_IN_MS = 5 * 1000;
 
 client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
@@ -35,12 +35,12 @@ client.on("messageCreate", async message => {
 const handleCommandInRegularChannel = async (message, replyText) => {
   const reply = await message.reply(replyText);
   
-  await utils.sleep(REPLY_DELETION_IN_MS);
+  await utils.sleep(CLEAN_UP_DELAY_IN_MS);
 
   const channel = message.channel;
 
-  message.delete();
-  reply.delete();
+  await message.delete();
+  await reply.delete();
 
   channel.messages.cache.forEach(channelMessage => {
     const isMessageDeleted = !channel.messages.cache.get(channelMessage.id) 
@@ -57,10 +57,10 @@ const handleCommandInRegularChannel = async (message, replyText) => {
 const handleNonCommandInCommandChannel = async (message, replyText) => {
   const reply = await message.reply(replyText);
   
-  await utils.sleep(REPLY_DELETION_IN_MS);
+  await utils.sleep(CLEAN_UP_DELAY_IN_MS);
 
-  message.delete();
-  reply.delete();
+  await message.delete();
+  await reply.delete();
 }
 
 keepAlive();
