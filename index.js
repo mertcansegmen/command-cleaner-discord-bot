@@ -4,9 +4,12 @@ const utils = require("./utils.js");
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const COMMAND_CHANNEL = "bot-commands";
-const COMMAND_PREFIXES = ["#"];
+const COMMAND_CHANNEL = "bot-command";
+const COMMAND_PREFIXES = ["#", "="];
 const CLEAN_UP_DELAY_IN_MS = 5 * 1000;
+
+const COMMAND_IN_REGULAR_CHANNEL_MESSAGE = "You can't post commands in this channel. Use bot-commands channel for that.";
+const NON_COMMAND_IN_COMMAND_CHANNEL_MESSAGE = "You can only post bot commands in this channel.";
 
 client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
@@ -20,42 +23,55 @@ client.on("messageCreate", async message => {
     .some(pre => message.content.startsWith(pre));
 
   if(!isCommandChannel && isMessageCommand) {
-    const replyText = "You can't post commands in this channel. Use bot-commands channel for that.";
-
-    handleCommandInRegularChannel(message, replyText);
+    handleCommandInRegularChannel(message);
   }
   
   if(isCommandChannel && !isMessageCommand) {
-    const replyText = "You can only post bot commands in this channel.";
-    
-    handleNonCommandInCommandChannel(message,replyText);
+    handleNonCommandInCommandChannel(message);
   }
 });
 
-const handleCommandInRegularChannel = async (message, replyText) => {
-  const reply = await message.reply(replyText);
+const handleCommandInRegularChannel = async (message) => {
+  const reply = await message.reply(COMMAND_IN_REGULAR_CHANNEL_MESSAGE);
   
   await utils.sleep(CLEAN_UP_DELAY_IN_MS);
 
   const channel = message.channel;
+  
+  const commandChannel = message.guild.channels.cache.find(
+    eachChannel => eachChannel.name === COMMAND_CHANNEL
+  )
 
-  await message.delete();
-  await reply.delete();
+  channel.messages.cache.forEach(async channelMessage => {
+    let isInitialMessageReply = false;
 
-  channel.messages.cache.forEach(channelMessage => {
-    const isMessageDeleted = !channel.messages.cache.get(channelMessage.id) 
-      || channelMessage.id === message.id
-      || channelMessage.id === reply.id;
-    const isMessageAuthorBot = channelMessage.author.bot;
-
-    if(!isMessageDeleted && isMessageAuthorBot) {
-      channelMessage.delete()
+    if(channelMessage.type === "REPLY") {
+      let repliedMessage = await channelMessage.fetchReference();
+        if(message.id === repliedMessage.id) {
+          isInitialMessageReply = true;
+        }
     }
-  });
+
+    const isMessageFromMe = channelMessage.author.id === client.user.id;
+    const isInitialMessage = channelMessage.id === message.id;
+
+    const willDelete = isInitialMessage || isInitialMessageReply || isMessageFromMe;
+    const willRepost = !isMessageFromMe && (isInitialMessage || isInitialMessageReply);
+
+    const isMessageDeleted = await !channel.messages.cache.get(channelMessage.id);
+
+    if(!isMessageDeleted && willRepost) {
+      await commandChannel.send(`${channelMessage.author.username}: ${channelMessage.content} \n`);
+    }
+
+    if(!isMessageDeleted && willDelete) {
+      await channelMessage.delete();
+    }
+  });;
 }
 
-const handleNonCommandInCommandChannel = async (message, replyText) => {
-  const reply = await message.reply(replyText);
+const handleNonCommandInCommandChannel = async (message) => {
+  const reply = await message.reply(NON_COMMAND_IN_COMMAND_CHANNEL_MESSAGE);
   
   await utils.sleep(CLEAN_UP_DELAY_IN_MS);
 
