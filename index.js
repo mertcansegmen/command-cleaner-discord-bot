@@ -1,64 +1,139 @@
 const { Client, Intents } = require('discord.js');
 const keepAlive = require("./server.js");
 const utils = require("./utils.js");
+const db = require("./db.js");
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const COMMAND_CHANNEL = "bot-command";
-const COMMAND_PREFIXES = ["#", "="];
 const CLEAN_UP_DELAY_IN_MS = 5 * 1000;
-
-const COMMAND_IN_REGULAR_CHANNEL_MESSAGE = "You can't post commands in this channel. Use bot-commands channel for that.";
-const NON_COMMAND_IN_COMMAND_CHANNEL_MESSAGE = "You can only post bot commands in this channel.";
 
 client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
 });
 
-client.on("messageCreate", async message => {
-  if(message.author.bot) return;
+// TODO: check if command channel was deleted-updated
+client.on("messageCreate", async receivedMessage => {
+  if(receivedMessage.author.bot) return;
 
-  const isCommandChannel = message.channel.name === COMMAND_CHANNEL;
-  const isMessageCommand = COMMAND_PREFIXES
-    .some(pre => message.content.startsWith(pre));
+  const isCCCommand = receivedMessage.content.startsWith("!!");
+
+  if(isCCCommand) {
+    await handleCCCommand(receivedMessage);
+  }
+
+  const commandChannelName = await db.getCommandChannel();
+  const commandPrefixes = await db.getCommandPrefixes();
+
+  const isCommandChannelSet = !!commandChannelName;
+  const isCommandPrefixesEmpty = !commandPrefixes || commandPrefixes.length < 1;
+
+  if(!isCommandChannelSet || isCommandPrefixesEmpty) {
+    return;
+  }
+
+  const isCommandChannel = receivedMessage.channel.name === commandChannelName;
+  const isMessageCommand = commandPrefixes.some(pre => receivedMessage.content.startsWith(pre));
 
   if(!isCommandChannel && isMessageCommand) {
-    handleCommandInRegularChannel(message);
-  }
-  
-  if(isCommandChannel && !isMessageCommand) {
-    handleNonCommandInCommandChannel(message);
+    handleCommandInRegularChannel(receivedMessage);
   }
 });
 
-const handleCommandInRegularChannel = async (message) => {
-  const reply = await message.reply(COMMAND_IN_REGULAR_CHANNEL_MESSAGE);
+const handleCCCommand = async (receivedMessage) => {
+  if (receivedMessage.content === "!!info") {
+    await handleInfoCommand(receivedMessage);
+  } else if (receivedMessage.content.startsWith("!!mark")) {
+    await handleMarkCommand(receivedMessage);
+  } else if (receivedMessage.content.startsWith("!!add ")) {
+    await handleAddCommand(receivedMessage);
+  } else if (receivedMessage.content.startsWith("!!remove ")) {
+    await handleRemoveCommand(receivedMessage);
+  } else if (receivedMessage.content === "!!list") {
+    await handleListCommand(receivedMessage);
+  } else {
+    await receivedMessage.reply("Invalid command. Use !!info command to see all commands you can use.");
+  }
+}
+
+const handleInfoCommand = async (receivedMessage) => {
+  let replyText = "**!!mark**: Marks the channel as command channel. The commands that are posted to other channels will be moved to this channel.\n";
+  replyText += "**!!add [command prefix]**: Adds new command prefix. The messages that start with the prefix will be moved to command channel.\n"
+  replyText += "**!!remove [command prefix]**: Removes command prefix.\n";
+  replyText += "**!!list**: List all command prefixes.";
+
+  receivedMessage.reply(replyText);
+}
+
+const handleMarkCommand = async (receivedMessage) => {
+  const commandChannel = receivedMessage.channel.name;
+  await db.setCommandChannel(commandChannel);
+
+  await receivedMessage.reply(`The channel "${commandChannel}" is now set as the command channel.`);
+}
+
+const handleAddCommand = async (receivedMessage) => {
+  const commandPrefix = receivedMessage.content.slice(6);
+
+  await db.addCommandPrefix(commandPrefix);
+
+  await receivedMessage.reply(`Added the command prefix "${commandPrefix}".`);
+}
+
+const handleRemoveCommand = async (receivedMessage) => {
+  const commandPrefixes = await db.getCommandPrefixes();
+  
+  const commandPrefix = receivedMessage.content.slice(9);
+
+  if(!commandPrefixes.includes(commandPrefix)) {
+    const replyText = `Can't remove "${commandPrefix}" because it does not exist. `;
+
+    await receivedMessage.reply(replyText);
+
+    return;
+  }
+
+  await db.removeCommandPrefix(commandPrefix);
+
+  await receivedMessage.reply(`Removed the command prefix ${commandPrefix}`);
+}
+
+const handleListCommand = async (receivedMessage) => {
+  const commandPrefixes = await db.getCommandPrefixes();
+  
+  const replyText = commandPrefixes.map(p => `- ${p}`).join("\n");
+
+  await receivedMessage.reply(replyText);
+}
+
+const handleCommandInRegularChannel = async (receivedMessage) => {
+  await receivedMessage.reply("You can't post commands in this channel. Use bot-commands channel for that.");
   
   await utils.sleep(CLEAN_UP_DELAY_IN_MS);
-
-  const channel = message.channel;
   
-  const commandChannel = message.guild.channels.cache.find(
-    eachChannel => eachChannel.name === COMMAND_CHANNEL
+  const commandChannelName = await db.getCommandChannel();
+  const currentChannel = receivedMessage.channel;
+  
+  const commandChannel = receivedMessage.guild.channels.cache.find(
+    eachChannel => eachChannel.name === commandChannelName
   )
 
-  channel.messages.cache.forEach(async channelMessage => {
+  currentChannel.messages.cache.forEach(async channelMessage => {
     let isInitialMessageReply = false;
 
     if(channelMessage.type === "REPLY") {
       let repliedMessage = await channelMessage.fetchReference();
-        if(message.id === repliedMessage.id) {
+        if(receivedMessage.id === repliedMessage.id) {
           isInitialMessageReply = true;
         }
     }
 
     const isMessageFromMe = channelMessage.author.id === client.user.id;
-    const isInitialMessage = channelMessage.id === message.id;
+    const isInitialMessage = channelMessage.id === receivedMessage.id;
 
     const willDelete = isInitialMessage || isInitialMessageReply || isMessageFromMe;
     const willRepost = !isMessageFromMe && (isInitialMessage || isInitialMessageReply);
 
-    const isMessageDeleted = await !channel.messages.cache.get(channelMessage.id);
+    const isMessageDeleted = await !currentChannel.messages.cache.get(channelMessage.id);
 
     if(!isMessageDeleted && willRepost) {
       await commandChannel.send(`${channelMessage.author.username}: ${channelMessage.content} \n`);
@@ -68,15 +143,6 @@ const handleCommandInRegularChannel = async (message) => {
       await channelMessage.delete();
     }
   });;
-}
-
-const handleNonCommandInCommandChannel = async (message) => {
-  const reply = await message.reply(NON_COMMAND_IN_COMMAND_CHANNEL_MESSAGE);
-  
-  await utils.sleep(CLEAN_UP_DELAY_IN_MS);
-
-  await message.delete();
-  await reply.delete();
 }
 
 keepAlive();
