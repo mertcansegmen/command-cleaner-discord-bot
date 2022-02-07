@@ -42,7 +42,7 @@ client.on("messageCreate", async receivedMessage => {
 const handleCCCommand = async (receivedMessage) => {
   if (receivedMessage.content === "!!info") {
     await handleInfoCommand(receivedMessage);
-  } else if (receivedMessage.content.startsWith("!!mark")) {
+  } else if (receivedMessage ==="!!mark") {
     await handleMarkCommand(receivedMessage);
   } else if (receivedMessage.content.startsWith("!!add ")) {
     await handleAddCommand(receivedMessage);
