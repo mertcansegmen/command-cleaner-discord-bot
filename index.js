@@ -118,20 +118,20 @@ const handleCommandInRegularChannel = async (receivedMessage) => {
   )
 
   currentChannel.messages.cache.forEach(async channelMessage => {
-    let isInitialMessageReply = false;
+    let isReplyToReceivedMessage = false;
 
     if(channelMessage.type === "REPLY") {
       let repliedMessage = await channelMessage.fetchReference();
         if(receivedMessage.id === repliedMessage.id) {
-          isInitialMessageReply = true;
+          isReplyToReceivedMessage = true;
         }
     }
 
     const isMessageFromMe = channelMessage.author.id === client.user.id;
     const isInitialMessage = channelMessage.id === receivedMessage.id;
 
-    const willDelete = isInitialMessage || isInitialMessageReply || isMessageFromMe;
-    const willRepost = !isMessageFromMe && (isInitialMessage || isInitialMessageReply);
+    const willDelete = isInitialMessage || isReplyToReceivedMessage || isMessageFromMe;
+    const willRepost = !isMessageFromMe && (isInitialMessage || isReplyToReceivedMessage);
 
     const isMessageDeleted = await !currentChannel.messages.cache.get(channelMessage.id);
 
