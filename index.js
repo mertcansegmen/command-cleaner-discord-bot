@@ -12,7 +12,6 @@ client.on("ready", () => {
 });
 
 // TODO: add prettier
-// TODO: fix mark command not working
 // TODO: cover empty command list
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
@@ -46,7 +45,7 @@ client.on("messageCreate", async receivedMessage => {
 const handleCCCommand = async (receivedMessage) => {
   if (receivedMessage.content === "!!info") {
     await handleInfoCommand(receivedMessage);
-  } else if (receivedMessage ==="!!mark") {
+  } else if (receivedMessage.content ==="!!mark") {
     await handleMarkCommand(receivedMessage);
   } else if (receivedMessage.content.startsWith("!!add ")) {
     await handleAddCommand(receivedMessage);
