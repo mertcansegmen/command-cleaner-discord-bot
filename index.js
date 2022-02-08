@@ -12,7 +12,8 @@ client.on("ready", () => {
 });
 
 // TODO: add prettier
-// TODO: cover empty command list
+// TODO: make command channel name in the warning dynamic from database 
+// TODO: add bold font to commands in replies
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
 
@@ -102,8 +103,13 @@ const handleRemoveCommand = async (receivedMessage) => {
 
 const handleListCommand = async (receivedMessage) => {
   const commandPrefixes = await db.getCommandPrefixes();
-  
-  const replyText = commandPrefixes.map(p => `- ${p}`).join("\n");
+
+  let replyText = "";
+  if(!commandPrefixes.length) {
+    replyText = "You do not have any command yet. Use **!!add [command name]** to add a new command";
+  } else {
+    replyText = commandPrefixes.map(p => `- ${p}`).join("\n");
+  }
 
   await receivedMessage.reply(replyText);
 }
