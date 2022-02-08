@@ -12,7 +12,7 @@ client.on("ready", () => {
 });
 
 // TODO: add prettier
-// TODO: make command channel name in the warning dynamic from database 
+// TODO: add which channel the comamnd was posted in repost
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
 
@@ -114,11 +114,12 @@ const handleListCommand = async (receivedMessage) => {
 }
 
 const handleCommandInRegularChannel = async (receivedMessage) => {
-  await receivedMessage.reply("You can't post commands in this channel. Use bot-commands channel for that.");
+  const commandChannelName = await db.getCommandChannel();
+
+  await receivedMessage.reply(`You can't post commands in this channel. Use "${commandChannelName}" channel for that.`);
   
   await utils.sleep(CLEAN_UP_DELAY_IN_MS);
   
-  const commandChannelName = await db.getCommandChannel();
   const currentChannel = receivedMessage.channel;
   
   const commandChannel = receivedMessage.guild.channels.cache.find(
