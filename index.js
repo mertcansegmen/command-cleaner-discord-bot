@@ -13,7 +13,6 @@ client.on("ready", () => {
 
 // TODO: add prettier
 // TODO: make command channel name in the warning dynamic from database 
-// TODO: change isInitialMessage to isReceivedMessage
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
 
@@ -137,10 +136,10 @@ const handleCommandInRegularChannel = async (receivedMessage) => {
     }
 
     const isMessageFromMe = channelMessage.author.id === client.user.id;
-    const isInitialMessage = channelMessage.id === receivedMessage.id;
+    const isReceivedMessage = channelMessage.id === receivedMessage.id;
 
-    const willDelete = isInitialMessage || isReplyToReceivedMessage || isMessageFromMe;
-    const willRepost = !isMessageFromMe && (isInitialMessage || isReplyToReceivedMessage);
+    const willDelete = isReceivedMessage || isReplyToReceivedMessage || isMessageFromMe;
+    const willRepost = !isMessageFromMe && (isReceivedMessage || isReplyToReceivedMessage);
 
     const isMessageDeleted = await !currentChannel.messages.cache.get(channelMessage.id);
 
