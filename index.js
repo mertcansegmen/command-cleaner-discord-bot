@@ -11,7 +11,9 @@ client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
 });
 
-// TODO: check if command channel was deleted-updated
+// TODO: add prettier
+// TODO: fix mark command not working
+// TODO: cover empty command list
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
 
@@ -20,6 +22,8 @@ client.on("messageCreate", async receivedMessage => {
   if(isCCCommand) {
     await handleCCCommand(receivedMessage);
   }
+
+  await checkIfCommandChannelDeleted(receivedMessage);
 
   const commandChannelName = await db.getCommandChannel();
   const commandPrefixes = await db.getCommandPrefixes();
@@ -143,6 +147,22 @@ const handleCommandInRegularChannel = async (receivedMessage) => {
       await channelMessage.delete();
     }
   });;
+}
+
+const checkIfCommandChannelDeleted = async (receivedMessage) => {
+  const commandChannelName = await db.getCommandChannel();
+
+  if(!commandChannelName) {
+    return;
+  }
+
+  const commandChannel = receivedMessage.guild.channels.cache.find(
+    eachChannel => eachChannel.name === commandChannelName
+  );
+
+  if(!commandChannel) {
+    await db.setCommandChannel(null);
+  }
 }
 
 keepAlive();
