@@ -13,7 +13,7 @@ client.on("ready", () => {
 
 // TODO: add prettier
 // TODO: make command channel name in the warning dynamic from database 
-// TODO: add bold font to commands in replies
+// TODO: change isInitialMessage to isReceivedMessage
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
 
@@ -55,7 +55,7 @@ const handleCCCommand = async (receivedMessage) => {
   } else if (receivedMessage.content === "!!list") {
     await handleListCommand(receivedMessage);
   } else {
-    await receivedMessage.reply("Invalid command. Use !!info command to see all commands you can use.");
+    await receivedMessage.reply("Invalid command. Use **!!info** command to see all commands you can use.");
   }
 }
 
