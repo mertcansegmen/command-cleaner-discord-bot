@@ -12,7 +12,6 @@ client.on("ready", () => {
 });
 
 // TODO: add prettier
-// TODO: add which channel the comamnd was posted in repost
 client.on("messageCreate", async receivedMessage => {
   if(receivedMessage.author.bot) return;
 
@@ -145,7 +144,13 @@ const handleCommandInRegularChannel = async (receivedMessage) => {
     const isMessageDeleted = await !currentChannel.messages.cache.get(channelMessage.id);
 
     if(!isMessageDeleted && willRepost) {
-      await commandChannel.send(`${channelMessage.author.username}: ${channelMessage.content} \n`);
+      const author = channelMessage.author.username;
+      const channel = channelMessage.channel.name;
+      const messageBody = channelMessage.content;
+
+      const repostMessage = `**${author}** to **${channel}**: ${messageBody} \n`
+
+      await commandChannel.send(repostMessage);
     }
 
     if(!isMessageDeleted && willDelete) {
