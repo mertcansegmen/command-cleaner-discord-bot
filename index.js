@@ -8,6 +8,7 @@ const client = new Client({
 });
 
 const CLEAN_UP_DELAY_IN_MS = 5 * 1000;
+const CC_PREFIX = ",,";
 
 client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
@@ -16,7 +17,7 @@ client.on("ready", () => {
 client.on("messageCreate", async (receivedMessage) => {
   if (receivedMessage.author.bot) return;
 
-  const isCCCommand = receivedMessage.content.startsWith("!!");
+  const isCCCommand = receivedMessage.content.startsWith(CC_PREFIX);
 
   if (isCCCommand) {
     await handleCCCommand(receivedMessage);
@@ -45,30 +46,28 @@ client.on("messageCreate", async (receivedMessage) => {
 });
 
 const handleCCCommand = async (receivedMessage) => {
-  if (receivedMessage.content === "!!info") {
+  if (receivedMessage.content === `${CC_PREFIX}info`) {
     await handleInfoCommand(receivedMessage);
-  } else if (receivedMessage.content === "!!mark") {
+  } else if (receivedMessage.content === `${CC_PREFIX}mark`) {
     await handleMarkCommand(receivedMessage);
-  } else if (receivedMessage.content.startsWith("!!add ")) {
+  } else if (receivedMessage.content.startsWith(`${CC_PREFIX}add `)) {
     await handleAddCommand(receivedMessage);
-  } else if (receivedMessage.content.startsWith("!!remove ")) {
+  } else if (receivedMessage.content.startsWith(`${CC_PREFIX}remove `)) {
     await handleRemoveCommand(receivedMessage);
-  } else if (receivedMessage.content === "!!list") {
+  } else if (receivedMessage.content === `${CC_PREFIX}list`) {
     await handleListCommand(receivedMessage);
   } else {
     await receivedMessage.reply(
-      "Invalid command. Use **!!info** command to see all commands you can use."
+      `Invalid command. Use **${CC_PREFIX}info** command to see all commands you can use.`
     );
   }
 };
 
 const handleInfoCommand = async (receivedMessage) => {
-  let replyText =
-    "**!!mark**: Marks the channel as command channel. The commands that are posted to other channels will be moved to this channel.\n";
-  replyText +=
-    "**!!add [command prefix]**: Adds new command prefix. The messages that start with the prefix will be moved to command channel.\n";
-  replyText += "**!!remove [command prefix]**: Removes command prefix.\n";
-  replyText += "**!!list**: List all command prefixes.";
+  let replyText = `**${CC_PREFIX}mark**: Marks the channel as command channel. The commands that are posted to other channels will be moved to this channel.\n`;
+  replyText += `**${CC_PREFIX}add [command prefix]**: Adds new command prefix. The messages that start with the prefix will be moved to command channel.\n`;
+  replyText += `**${CC_PREFIX}remove [command prefix]**: Removes command prefix.\n`;
+  replyText += `**${CC_PREFIX}list**: List all command prefixes.`;
 
   receivedMessage.reply(replyText);
 };
@@ -113,8 +112,7 @@ const handleListCommand = async (receivedMessage) => {
 
   let replyText = "";
   if (!commandPrefixes.length) {
-    replyText =
-      "You do not have any command yet. Use **!!add [command name]** to add a new command";
+    replyText = `You do not have any command yet. Use **${CC_PREFIX}add [command name]** to add a new command`;
   } else {
     replyText = commandPrefixes.map((p) => `- ${p}`).join("\n");
   }
