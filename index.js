@@ -10,6 +10,10 @@ const client = new Client({
 const CLEAN_UP_DELAY_IN_MS = 5 * 1000;
 const CC_PREFIX = ",,";
 
+// TODO: fix info message for no command
+// TODO: add todos to readme file
+// TODO: add a command for showing marked command channel
+// TODO: add documentation
 client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
 });
@@ -25,8 +29,10 @@ client.on("messageCreate", async (receivedMessage) => {
 
   await checkIfCommandChannelDeleted(receivedMessage);
 
-  const commandChannelName = await db.getCommandChannel();
-  const commandPrefixes = await db.getCommandPrefixes();
+  const commandChannelName = await db.getCommandChannel(
+    receivedMessage.guildId
+  );
+  const commandPrefixes = await db.getCommandPrefixes(receivedMessage.guildId);
 
   const isCommandChannelSet = !!commandChannelName;
   const isCommandPrefixesEmpty = !commandPrefixes || commandPrefixes.length < 1;
@@ -74,7 +80,7 @@ const handleInfoCommand = async (receivedMessage) => {
 
 const handleMarkCommand = async (receivedMessage) => {
   const commandChannel = receivedMessage.channel.name;
-  await db.setCommandChannel(commandChannel);
+  await db.setCommandChannel(receivedMessage.guildId, commandChannel);
 
   await receivedMessage.reply(
     `The channel "${commandChannel}" is now set as the command channel.`
@@ -84,17 +90,33 @@ const handleMarkCommand = async (receivedMessage) => {
 const handleAddCommand = async (receivedMessage) => {
   const commandPrefix = receivedMessage.content.slice(6);
 
-  await db.addCommandPrefix(commandPrefix);
+  const commandPrefixExists = await db.commandPrefixExists(
+    receivedMessage.guildId,
+    commandPrefix
+  );
+
+  if (commandPrefixExists) {
+    const replyText = `The command prefix "${commandPrefix}" already exists.`;
+
+    await receivedMessage.reply(replyText);
+
+    return;
+  }
+
+  await db.addCommandPrefix(receivedMessage.guildId, commandPrefix);
 
   await receivedMessage.reply(`Added the command prefix "${commandPrefix}".`);
 };
 
 const handleRemoveCommand = async (receivedMessage) => {
-  const commandPrefixes = await db.getCommandPrefixes();
-
   const commandPrefix = receivedMessage.content.slice(9);
 
-  if (!commandPrefixes.includes(commandPrefix)) {
+  const commandPrefixExists = await db.commandPrefixExists(
+    receivedMessage.guildId,
+    commandPrefix
+  );
+
+  if (!commandPrefixExists) {
     const replyText = `Can't remove "${commandPrefix}" because it does not exist. `;
 
     await receivedMessage.reply(replyText);
@@ -102,13 +124,13 @@ const handleRemoveCommand = async (receivedMessage) => {
     return;
   }
 
-  await db.removeCommandPrefix(commandPrefix);
+  await db.removeCommandPrefix(receivedMessage.guildId, commandPrefix);
 
-  await receivedMessage.reply(`Removed the command prefix ${commandPrefix}`);
+  await receivedMessage.reply(`Removed the command prefix "${commandPrefix}"`);
 };
 
 const handleListCommand = async (receivedMessage) => {
-  const commandPrefixes = await db.getCommandPrefixes();
+  const commandPrefixes = await db.getCommandPrefixes(receivedMessage.guildId);
 
   let replyText = "";
   if (!commandPrefixes.length) {
@@ -121,7 +143,9 @@ const handleListCommand = async (receivedMessage) => {
 };
 
 const handleCommandInRegularChannel = async (receivedMessage) => {
-  const commandChannelName = await db.getCommandChannel();
+  const commandChannelName = await db.getCommandChannel(
+    receivedMessage.guildId
+  );
 
   await receivedMessage.reply(
     `You can't post commands in this channel. Use "${commandChannelName}" channel for that.`
@@ -174,7 +198,9 @@ const handleCommandInRegularChannel = async (receivedMessage) => {
 };
 
 const checkIfCommandChannelDeleted = async (receivedMessage) => {
-  const commandChannelName = await db.getCommandChannel();
+  const commandChannelName = await db.getCommandChannel(
+    receivedMessage.guildId
+  );
 
   if (!commandChannelName) {
     return;
@@ -185,7 +211,7 @@ const checkIfCommandChannelDeleted = async (receivedMessage) => {
   );
 
   if (!commandChannel) {
-    await db.setCommandChannel(null);
+    await db.clearCommandChannel(receivedMessage.guildId);
   }
 };
 
