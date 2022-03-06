@@ -21,12 +21,23 @@ const updateDb = async () => {
 
 updateDb();
 
+/**
+ * Gets all command channels from database. If there isn't
+ * any, it returns an empty array.
+ * @return {Array<Object>} - All command channels
+ */
 const getAllCommandChannels = async () => {
   const commandChannels = await db.get(KEY_COMMAND_CHANNELS);
 
   return commandChannels || [];
 };
 
+/**
+ * Returns the name of the command channel set for the guild. 
+ * If a command channel was not set for the guild, it returns null.
+ * @param {string} guildId - Id of the guild
+ * @returns {string|null} - Name of the command channel
+ */
 const getCommandChannel = async (guildId) => {
   const commandChannels = await getAllCommandChannels();
 
@@ -35,6 +46,11 @@ const getCommandChannel = async (guildId) => {
   return commandChannel?.name;
 };
 
+/**
+ * Sets the command channel of the guild.
+ * @param {string} guildId - Id of the guild
+ * @param {string} channelName - Name of the command channel
+ */
 const setCommandChannel = async (guildId, channelName) => {
   const commandChannels = await getAllCommandChannels();
 
@@ -55,6 +71,10 @@ const setCommandChannel = async (guildId, channelName) => {
   await db.set(KEY_COMMAND_CHANNELS, updatedCommandChannels);
 };
 
+/**
+ * Removes the command channel set for a guild.
+ * @param {string} guildId - Id of the guild
+ */
 const clearCommandChannel = async (guildId) => {
   const commandChannels = await getAllCommandChannels();
 
@@ -65,18 +85,36 @@ const clearCommandChannel = async (guildId) => {
   await db.set(KEY_COMMAND_CHANNELS, updatedCommandChannels);
 };
 
+/**
+ * Returns all the command prefixes set for a guild. If the guild
+ * has no command prefix set, returns an empty array.
+ * @returns {Array<string>} - Command prefixes set for the guild
+ */
 const getAllCommandPrefixes = async () => {
   const commandPrefixes = await db.get(KEY_COMMAND_PREFIXES);
 
   return commandPrefixes || [];
 };
 
+/**
+ * Checks whether or not a guild has at least one command prefix
+ * set.
+ * @param {string} guildId - Id of the guild
+ * @returns {boolean} - true if a command prefix set, false otherwise
+ */
 const guildHasCommandPrefixEntry = async (guildId) => {
   const commandPrefixes = await getAllCommandPrefixes();
 
   return commandPrefixes.some((cp) => cp.guildId === guildId);
 };
 
+/**
+ * Returns whether or not a specific command prefix exists for a
+ * guild.
+ * @param {string} guildId - Id of the guild
+ * @param {string} commandPrefix - The command prefix to check
+ * @returns {boolean} - true if a command prefix set, false otherwise
+ */
 const commandPrefixExists = async (guildId, commandPrefix) => {
   const commandPrefixes = await getAllCommandPrefixes();
 
@@ -89,6 +127,12 @@ const commandPrefixExists = async (guildId, commandPrefix) => {
     .prefixes.includes(commandPrefix);
 };
 
+/**
+ * Returns the command prefixes set of a guild. If there is no command
+ * prefix set for the guild, returns an empty array.
+ * @param {string} guildId - Id of the guild
+ * @returns {Array<string>} - Command prefixes of the guild
+ */
 const getCommandPrefixes = async (guildId) => {
   const commandPrefixes = await getAllCommandPrefixes();
 
@@ -101,6 +145,12 @@ const getCommandPrefixes = async (guildId) => {
     : guildCommandPrefixes.prefixes;
 };
 
+/**
+ * Adds a command prefix for a guild.
+ * @param {string} guildId - Id of the guild
+ * @param {string} newCommandPrefix - The command prefix to add
+ * @throws Will throw an error if the command prefix already exists.
+ */
 const addCommandPrefix = async (guildId, newCommandPrefix) => {
   const commandPrefixes = await getAllCommandPrefixes();
 
@@ -144,6 +194,12 @@ const addCommandPrefix = async (guildId, newCommandPrefix) => {
   await db.set(KEY_COMMAND_PREFIXES, updatedCommandPrefixes);
 };
 
+/**
+ * Removes a command prefix from a guild.
+ * @param {string} guildId - Id of the guild
+ * @param {string} commandPrefixToDelete - The command prefix to remove
+ * @throws Will throw an error if the command prefix does not exist.
+ */
 const removeCommandPrefix = async (guildId, commandPrefixToDelete) => {
   const commandPrefixes = await getAllCommandPrefixes();
 
