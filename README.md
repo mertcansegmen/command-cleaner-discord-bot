@@ -10,9 +10,12 @@ TODO
 
 TODO
 
+# Notes
+
+- The word guild seen in the code and in the comments basically is reffering to a discord server.
+
 ## TODO
 
-- add notes section to readme file, start with adding what a guild is
 - add db structure to readme
 - add a command for showing marked command channel
 - fix info message for no command
