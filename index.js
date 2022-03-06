@@ -10,10 +10,6 @@ const client = new Client({
 const CLEAN_UP_DELAY_IN_MS = 5 * 1000;
 const CC_PREFIX = ",,";
 
-// TODO: fix info message for no command
-// TODO: add todos to readme file
-// TODO: add a command for showing marked command channel
-// TODO: add documentation
 client.on("ready", () => {
   console.log("Logged in as " + client.user.tag);
 });
