@@ -4,7 +4,7 @@ const utils = require("./utils.js");
 
 const TARGET_CHANNEL_NAME = 'bot-commands';
 const USER_TAGS = ['Flow Music#6823', 'FredBoat♪♪#7284'];
-const CLEAN_UP_DELAY_IN_MS = 10 * 1000;
+const CLEAN_UP_DELAY_IN_MS = 20 * 1000;
 
 const client = new Client({
   intents: [
@@ -26,22 +26,30 @@ client.on('messageCreate', async message => {
     return;
   }
 
-  // wait for the bot to think
+  console.log(`Will clean the message from ${message.author.tag}...`)
+
+  // wait for the bots response, it could take a couple of seconds
   await utils.sleep(CLEAN_UP_DELAY_IN_MS);
 
-  const channel = client.channels.cache.find(c => c.name === TARGET_CHANNEL_NAME);
+  const targetChannel = client.channels.cache.find(c => c.name === TARGET_CHANNEL_NAME);
 
   if (message.content?.length) {
     await message.delete();
-    await channel.send({ content: `Message from ${message.author}: ${content}` });
+    await targetChannel.send({ content: `Message from ${message.author}: ${message.content}` });
   }
 
   if (message.embeds?.length) {
     await message.delete();
-    await channel.send({
-      content: `Message from ${message.author}: ${content}`,
+    await targetChannel.send({
+      content: `Message from ${message.author}: ${message.content}`,
       embeds: message.embeds
     });
+  }
+});
+
+client.on('messageCreate', (message) => {
+  if (message.content === '/test') {
+    message.reply('Command received');
   }
 });
 
