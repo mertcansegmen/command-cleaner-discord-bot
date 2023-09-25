@@ -11,11 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@replit/database": "^2.0.1",
-    "discord.js": "^13.5.0",
-    "express": "^4.17.2",
-    "node": "^17.3.0",
-    "prettier": "^2.5.1",
-    "utils.js": "^1.0.1"
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.3.1",
+    "node": "^17.3.0"
   }
 }
