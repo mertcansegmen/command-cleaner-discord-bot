@@ -7,6 +7,26 @@ const registerCommands = async (clientId, guildId, token) => {
       description: "Tests the bot."
     },
     {
+      name: "command-channel-show",
+      description: "Shows the set command channel.",
+    },
+    {
+      name: "command-channel-set",
+      description: "Sets the command channel.",
+      options: [
+        {
+          name: "command-channel",
+          description: "Name of the command channel.",
+          type: ApplicationCommandOptionType.String,
+          required: true,
+        }
+      ],
+    },
+    {
+      name: "command-channel-clear",
+      description: "Clears the set command channel.",
+    },
+    {
       name: "user-tags-list",
       description: "List saved Discord user tags.",
     },
