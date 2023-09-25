@@ -138,11 +138,5 @@ client.on('messageCreate', async message => {
   }
 });
 
-client.on('messageCreate', (message) => {
-  if (message.content === '/test') {
-    message.reply('Command received');
-  }
-});
-
 keepAlive();
 client.login(process.env['TOKEN']);
