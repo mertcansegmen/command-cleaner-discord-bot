@@ -17,6 +17,12 @@ const client = new Client({
 client.on('ready', () => {
   console.log('Logged in as ' + client.user.tag);
 });
+client.on('guildCreate', async guild => {
+  console.log("Joined to a guild. id: ", guild.id, " name: ", guild.name);
+  console.log("Registering the commands for guild ", guild.name);
+
+  await commandRegistration.registerCommands(client.user.id, guild.id, process.env['TOKEN']);
+});
 
 client.on('messageCreate', async message => {
   const noCleaningNeeded = !USER_TAGS.includes(message.author.tag)
