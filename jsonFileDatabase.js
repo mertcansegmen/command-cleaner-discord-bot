@@ -18,7 +18,7 @@ class JSONFileDatabase {
 
   async set(key, value) {
     const filePath = this.getFilePath(key);
-    const jsonData = JSON.stringify(value, null, 2);
+    const jsonData = JSON.stringify(value, null, 0);
     fs.writeFileSync(filePath, jsonData, 'utf8');
   }
 
