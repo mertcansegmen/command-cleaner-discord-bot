@@ -1,16 +1,11 @@
 const {
   Client,
   GatewayIntentBits,
-  Partials,
-  REST,
-  Routes,
-  ApplicationCommandOptionType
 } = require("discord.js");
-const keepAlive = require("./server.js");
+require('dotenv').config()
 const utils = require("./utils.js");
 const db = require("./db.js");
 const commandRegistration = require("./commandRegistration");
-
 
 const CLEAN_UP_DELAY_IN_MS = 20 * 1000;
 
@@ -30,15 +25,13 @@ client.on('guildCreate', async guild => {
   console.log("Joined to a guild. id: ", guild.id, " name: ", guild.name);
   console.log("Registering the commands for guild ", guild.name);
 
-  await commandRegistration.registerCommands(client.user.id, guild.id, process.env['TOKEN']);
+  await commandRegistration.registerCommands(client.user.id, guild.id, process.env.TOKEN);
 });
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand) {
     return;
   }
-
-  console.log(interaction.commandName)
 
   if (interaction.commandName === "ping") {
     interaction.reply("I'm alive!")
@@ -138,5 +131,4 @@ client.on('messageCreate', async message => {
   }
 });
 
-keepAlive();
-client.login(process.env['TOKEN']);
+client.login(process.env.TOKEN);
