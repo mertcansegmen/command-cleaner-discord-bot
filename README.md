@@ -119,3 +119,4 @@ The "target user tags" document(table) stores a list of Discord user tags that t
 ## TODOs
 
 * add logging
+* add error handling with custom error objects
