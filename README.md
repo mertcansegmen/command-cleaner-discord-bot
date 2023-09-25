@@ -12,7 +12,7 @@ This README documentation provides an overview of the Command Cleaner, a Discord
   * [Command Channels](#command-channels)
   * [Target User Tags](#target-user-tags)
 * [Notes](#notes)
-* [TODOs](#todo)
+* [TODOs](#todos)
 
 ## Prerequisites
 
