@@ -1,5 +1,6 @@
 const JSONFileDatabase = require('./jsonFileDatabase');
-const db = new JSONFileDatabase('./.db');
+require('dotenv').config()
+const db = new JSONFileDatabase(process.env.DB_FOLDER_PATH);
 
 const DB_VERSION = "1";
 
