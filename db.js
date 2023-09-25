@@ -1,5 +1,5 @@
 const JSONFileDatabase = require('./jsonFileDatabase');
-const db = new JSONFileDatabase('./database');
+const db = new JSONFileDatabase('./.db');
 
 const DB_VERSION = "1";
 
