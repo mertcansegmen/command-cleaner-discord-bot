@@ -1,6 +1,5 @@
-const Database = require("@replit/database");
-
-const db = new Database();
+const JSONFileDatabase = require('./jsonFileDatabase');
+const db = new JSONFileDatabase('./database');
 
 const DB_VERSION = "1";
 
