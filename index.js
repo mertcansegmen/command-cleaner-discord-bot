@@ -4,6 +4,7 @@ const utils = require('./utils.js');
 const db = require('./db.js');
 const commandRegistration = require('./commandRegistration');
 const commandHandler = require('./commandHandler');
+const logger = require('./logger.js');
 
 const CLEAN_UP_DELAY_IN_MS = 20 * 1000;
 
@@ -16,12 +17,12 @@ const client = new Client({
 });
 
 client.on('ready', async () => {
-  console.log('Logged in as ' + client.user.tag);
+  logger.info('Logged in as ' + client.user.tag);
 });
 
 client.on('guildCreate', async (guild) => {
-  console.log('Joined to a guild. id: ', guild.id, ' name: ', guild.name);
-  console.log('Registering the commands for guild ', guild.name);
+  logger.info('Joined to a guild. id: ', guild.id, ' name: ', guild.name);
+  logger.info('Registering the commands for guild ', guild.name);
 
   await commandRegistration.registerCommands(
     client.user.id,
@@ -34,6 +35,8 @@ client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand) {
     return;
   }
+
+  logger.info('interactionCreate with command ' + interaction.commandName);
 
   switch (interaction.commandName) {
     case 'ping':

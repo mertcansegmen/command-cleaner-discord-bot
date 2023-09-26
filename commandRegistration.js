@@ -1,4 +1,5 @@
 const { REST, Routes, ApplicationCommandOptionType } = require('discord.js');
+const logger = require('./logger');
 
 const registerCommands = async (clientId, guildId, token) => {
   const commands = [
@@ -59,15 +60,24 @@ const registerCommands = async (clientId, guildId, token) => {
   const rest = new REST({ version: 10 }).setToken(token);
 
   try {
-    console.log('Registering slash commands...');
+    logger.info(
+      'Registering slash commands for guild with the guild id ' + guildId
+    );
 
     await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
       body: commands,
     });
 
-    console.log('Slash commands registered.');
+    logger.info(
+      'Slash commands registered for the guild with the guild id ' + guildId
+    );
   } catch (err) {
-    console.log('Error while registering the slash commands: ', err);
+    logger.error(
+      'Error while registering the slash commands for the guild with the guild id ' +
+        guildId +
+        ': ' +
+        err
+    );
   }
 };
 

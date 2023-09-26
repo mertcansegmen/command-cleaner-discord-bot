@@ -1,4 +1,5 @@
 const JSONFileDatabase = require('./jsonFileDatabase');
+const logger = require('./logger');
 require('dotenv').config();
 const db = new JSONFileDatabase(process.env.DB_FOLDER_PATH);
 
@@ -11,8 +12,8 @@ const KEY_TARGET_USER_TAGS = 'KEY_TARGET_USER_TAGS';
 const updateDbIfNewerVersion = async () => {
   const existingDbVersion = await db.get(KEY_DB_VERSION);
   if (existingDbVersion !== DB_VERSION) {
-    console.log(`Old DB Version: ${existingDbVersion || '0'}`);
-    console.log(`New DB Version: ${DB_VERSION}`);
+    logger.info(`Old DB Version: ${existingDbVersion || '0'}`);
+    logger.info(`New DB Version: ${DB_VERSION}`);
 
     await db.empty();
     await db.set(KEY_DB_VERSION, DB_VERSION);
