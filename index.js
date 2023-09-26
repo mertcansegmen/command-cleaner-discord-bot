@@ -8,6 +8,11 @@ const logger = require('./logger.js');
 
 const CLEAN_UP_DELAY_IN_MS = 20 * 1000;
 
+// handle uncaught exceptions
+process.on('uncaughtException', function (err) {
+  logger.error('Unhandled error: ' + err.message);
+});
+
 const client = new Client({
   intents: [
     GatewayIntentBits.MessageContent,
@@ -77,7 +82,7 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  console.log(`Will clean the message from ${message.author.tag}...`);
+  logger.info(`Will clean the message from ${message.author.tag}...`);
 
   // wait for the bots response, it could take a couple of seconds
   await utils.sleep(CLEAN_UP_DELAY_IN_MS);
