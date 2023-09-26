@@ -3,6 +3,7 @@
 
 # custom config
 .db/
+.logs/
 
 ### Node ###
 # Logs
