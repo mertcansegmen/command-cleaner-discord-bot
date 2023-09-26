@@ -1,17 +1,17 @@
 const JSONFileDatabase = require('./jsonFileDatabase');
-require('dotenv').config()
+require('dotenv').config();
 const db = new JSONFileDatabase(process.env.DB_FOLDER_PATH);
 
-const DB_VERSION = "1";
+const DB_VERSION = '1';
 
-const KEY_DB_VERSION = "KEY_DB_VERSION";
-const KEY_COMMAND_CHANNELS = "KEY_COMMAND_CHANNELS";
-const KEY_TARGET_USER_TAGS = "KEY_TARGET_USER_TAGS";
+const KEY_DB_VERSION = 'KEY_DB_VERSION';
+const KEY_COMMAND_CHANNELS = 'KEY_COMMAND_CHANNELS';
+const KEY_TARGET_USER_TAGS = 'KEY_TARGET_USER_TAGS';
 
 const updateDbIfNewerVersion = async () => {
   const existingDbVersion = await db.get(KEY_DB_VERSION);
   if (existingDbVersion !== DB_VERSION) {
-    console.log(`Old DB Version: ${existingDbVersion || "0"}`);
+    console.log(`Old DB Version: ${existingDbVersion || '0'}`);
     console.log(`New DB Version: ${DB_VERSION}`);
 
     await db.empty();
@@ -31,7 +31,7 @@ const getAllCommandChannels = async () => {
 };
 
 /**
- * Returns the name of the command channel set for the guild. 
+ * Returns the name of the command channel set for the guild.
  * If a command channel was not set for the guild, it returns null.
  * @param {string} guildId - Id of the guild
  * @returns {string|null} - Name of the command channel
@@ -99,7 +99,9 @@ const getAllTargetUserTags = async () => {
  */
 const getTargetUserTags = async (guildId) => {
   const allTargetUserTags = await getAllTargetUserTags();
-  const guildEntry = allTargetUserTags.find((entry) => entry.guildId === guildId);
+  const guildEntry = allTargetUserTags.find(
+    (entry) => entry.guildId === guildId
+  );
   return guildEntry ? guildEntry.targetUserTags : [];
 };
 
@@ -118,7 +120,9 @@ const addTargetUserTag = async (guildId, targetUserTag) => {
   if (guildEntryIndex !== -1) {
     const targetUserTags = allTargetUserTags[guildEntryIndex].targetUserTags;
     if (targetUserTags.includes(targetUserTag)) {
-      throw new Error(`Target user tag "${targetUserTag}" already exists for the guild.`);
+      throw new Error(
+        `Target user tag "${targetUserTag}" already exists for the guild.`
+      );
     } else {
       // Target user tag does not exist, add it
       targetUserTags.push(targetUserTag);
