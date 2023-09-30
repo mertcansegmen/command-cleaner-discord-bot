@@ -46,8 +46,11 @@ To set up and run the Command Cleaner Discord.js bot, follow these steps:
 1. Create a .env file in the project directory and add the following configuration.
 
    ```shell
-   TOKEN=YOUR_DISCORD_BOT_TOKEN
-   DB_FOLDER_PATH=YOUR_DB_FOLDER_PATH
+   TOKEN="YOUR_DISCORD_BOT_TOKEN"
+   DB_FOLDER_PATH="YOUR_DB_FOLDER_PATH"   // optional
+   LOG_LEVEL="info"                       // optional
+   ERROR_LOG_PATH=".logs\\app-error.log"  // optional
+   INFO_LOG_PATH=".logs\\app-info.log"    // optional
    ```
 
    Replace YOUR_DISCORD_BOT_TOKEN with the token you obtained from the Discord Developer Portal and YOUR_DB_FOLDER_PATH with the path to the folder where you want to store your JSON database files.
@@ -116,5 +119,4 @@ The "target user tags" document(table) stores a list of Discord user tags that t
 
 ## TODOs
 
-- add logging
 - add error handling with custom error objects
